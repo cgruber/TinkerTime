@@ -1,4 +1,5 @@
 /bin
+.factorypath
 .classpath
 .project
 Thumbs.db
