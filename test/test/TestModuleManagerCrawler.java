@@ -19,7 +19,7 @@ public class TestModuleManagerCrawler {
 	
 	private static JenkinsCrawler loadTestPage(int num) throws IOException, UnsupportedHostException {
 		URL url = TestModuleManagerCrawler.class.getClassLoader().getResource(String.format("json/moduleManagerPage%d.json", num));
-		return new JenkinsCrawler(url, new JsonLoader(), "Module Manager", new URL(Constants.MODULE_MANAGER_ARTIFACT_DL_URL));
+		return new JenkinsCrawler(url, new JsonLoader(), "TinkerTimeModule Manager", new URL(Constants.MODULE_MANAGER_ARTIFACT_DL_URL));
 	}
 
 	@Test

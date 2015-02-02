@@ -11,8 +11,11 @@ import org.junit.Before;
 import org.junit.Test;
 
 import test.util.MockConfig;
-import test.util.TestModLoader;
 import test.util.ModStubs;
+import test.util.TestModLoader;
+
+import com.google.gson.GsonBuilder;
+
 import aohara.tinkertime.controllers.ModLoader;
 import aohara.tinkertime.models.Mod;
 
@@ -21,7 +24,7 @@ public class TestModStateManager {
 	private Mod mod1, mod2;
 	private ModLoader modLoader;
 	private List<Mod> mods;
-	
+
 	private static Mod getUpdatedMod(final Mod mod, final String newestFile){
 		return new Mod(
 			mod.id,
@@ -33,9 +36,9 @@ public class TestModStateManager {
 			mod.getUpdatedOn(),
 			mod.getSupportedVersion()
 		);
-		
+
 	}
-	
+
 	private void update(Mod mod, boolean deleted){
 		if (deleted){
 			modLoader.modDeleted(mod);
@@ -50,7 +53,7 @@ public class TestModStateManager {
 		mod1 = TestModLoader.loadMod(ModStubs.Mechjeb);
 		mod2 = TestModLoader.loadMod(ModStubs.Engineer);
 
-		modLoader = ModLoader.create(new MockConfig());
+		modLoader = new ModLoader(new MockConfig(), new GsonBuilder().create());
 	}
 
 	@Test
@@ -78,33 +81,33 @@ public class TestModStateManager {
 	}
 
 	@Test
-	public void testSaveUpdatedMod() throws Throwable {	
+	public void testSaveUpdatedMod() throws Throwable {
 		testSaveOne();
-		
+
 		String newestFile = mod1.getNewestFileName() + "-updated";
 		Mod newer = getUpdatedMod(mod1, newestFile);
 		assertEquals(newestFile, newer.getNewestFileName());
-		
+
 		update(newer, false);
-		
+
 		assertEquals(1, mods.size());
 		assertTrue(mods.contains(newer));
 		assertEquals(newestFile, mods.get(0).getNewestFileName());
 	}
-	
+
 	@Test
 	public void testSaveModState(){
 		boolean mod1State = false;
 		mod1.setEnabled(mod1State);
 		update(mod1, false);
-		
+
 		assertEquals(mod1State, mod1.isEnabled());
 		assertEquals(mod1State, mods.get(0).isEnabled());
-		
+
 		boolean mod2State = true;
 		mod2.setEnabled(mod2State);
 		update(mod2, false);
-		
+
 		assertEquals(mod2State, mod2.isEnabled());
 		for (Mod mod : mods){
 			if (mod.equals(mod1)){
@@ -116,14 +119,14 @@ public class TestModStateManager {
 			}
 		}
 	}
-	
+
 	@Test
 	public void testModDeleted(){
 		update(mod1, false);
 		update(mod2, false);
-		
+
 		assertEquals(2, mods.size());
-		
+
 		update(mod1, true);
 		assertEquals(1, mods.size());
 		assertFalse(mods.contains(mod1));

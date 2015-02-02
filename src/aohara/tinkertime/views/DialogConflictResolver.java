@@ -7,7 +7,7 @@ import javax.swing.JOptionPane;
 import aohara.common.workflows.ConflictResolver;
 
 /**
- * Allows a Module Conflict to be resolved using a Modal Dialog.
+ * Allows a TinkerTimeModule Conflict to be resolved using a Modal Dialog.
  * 
  * @author Andrew O'Hara
  */
@@ -21,7 +21,7 @@ public class DialogConflictResolver extends ConflictResolver {
 				"%s already exists.  What should be done?",
 				conflictPath
 			),
-			"Module Conflict",
+			"TinkerTimeModule Conflict",
 			JOptionPane.QUESTION_MESSAGE,
 			null,
 			Resolution.values(),

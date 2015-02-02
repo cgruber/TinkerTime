@@ -21,7 +21,7 @@ public class TestModStructure {
 	private void testModules(ModStubs stub, String... expectedModuleNames) throws IOException{
 		ModStructure struct = TestModLoader.getStructure(stub);
 		
-		// Get Actual Module Names
+		// Get Actual TinkerTimeModule Names
 		Set<String> actualNames = new HashSet<>();
 		for (TreeNode module : struct.getModules()){
 			actualNames.add(module.getName());

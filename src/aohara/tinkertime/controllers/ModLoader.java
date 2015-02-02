@@ -1,5 +1,15 @@
 package aohara.tinkertime.controllers;
 
+import aohara.common.Listenable;
+import aohara.common.selectorPanel.SelectorInterface;
+import aohara.tinkertime.TinkerConfig;
+import aohara.tinkertime.crawlers.Crawler;
+import aohara.tinkertime.models.DefaultMods;
+import aohara.tinkertime.models.FileUpdateListener;
+import aohara.tinkertime.models.Mod;
+import aohara.tinkertime.views.FileChoosers;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
@@ -8,83 +18,68 @@ import java.lang.reflect.Type;
 import java.nio.file.Path;
 import java.util.HashSet;
 import java.util.Set;
-
+import javax.inject.Inject;
+import javax.inject.Singleton;
 import javax.swing.JOptionPane;
-
-import aohara.common.Listenable;
-import aohara.common.selectorPanel.SelectorInterface;
-import aohara.tinkertime.TinkerConfig;
-import aohara.tinkertime.crawlers.Crawler;
-import aohara.tinkertime.models.DefaultMods;
-import aohara.tinkertime.models.Mod;
-import aohara.tinkertime.models.FileUpdateListener;
-import aohara.tinkertime.views.FileChoosers;
-
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.reflect.TypeToken;
 
 /**
  * Controller for Storing and Retrieving persistent mod state.
- * 
+ *
  * Any time a mod's information or state is updated, the updater must call
- * modUpdated as specified by the ModUpdateListener interface. 
- * 
+ * modUpdated as specified by the ModUpdateListener interface.
+ *
  * @author Andrew O'Hara
  */
+@Singleton
 public class ModLoader extends Listenable<SelectorInterface<Mod>>
 		implements ModUpdateListener, FileUpdateListener {
-	
+
 	private final Gson gson;
 	private final TinkerConfig config;
 	private final Type modsType = new TypeToken<Set<Mod>>() {}.getType();
 	private final Set<Mod> modCache = new HashSet<>();
-	
+
 	// -- Initializers ----------------------------------------
-	
+	@Inject
 	public ModLoader(TinkerConfig config, Gson gson){
 		this.config = config;
 		this.gson = gson;
 	}
-	
-	public static ModLoader create(TinkerConfig config){
-		return new ModLoader(config, new GsonBuilder().setPrettyPrinting().create());
-	}
-	
+
 	public synchronized void init(ModManager mm){
 		for (SelectorInterface<Mod> l : getListeners()){
 			l.clear();
 		}
 		importMods(config.getModsListPath(), mm);
 	}
-	
+
 	//-- Public Methods ----------------------------------------
-	
+
 	public synchronized Set<Mod> getMods(){
 		return new HashSet<Mod>(modCache);
 	}
-	
+
 	/**
 	 * Call when a mod has been updated.
-	 * 
+	 *
 	 * Updates the persistent mod data, and refreshes the mod views.
 	 */
 	@Override
 	public synchronized void modUpdated(Mod mod) {
 		modCache.remove(mod);
 		modCache.add(mod);
-		
+
 		for (SelectorInterface<Mod> l : getListeners()){
 			l.removeElement(mod);
 			l.addElement(mod);
 		}
-		
+
 		saveMods(modCache, config.getModsListPath());
 	}
-	
+
 	/**
 	 * Call when a mod has been deleted.
-	 * 
+	 *
 	 * Deleted the persistent mod data, and removes from mod views.
 	 */
 	@Override
@@ -95,7 +90,7 @@ public class ModLoader extends Listenable<SelectorInterface<Mod>>
 		}
 		saveMods(modCache, config.getModsListPath());
 	}
-	
+
 	public synchronized void exportEnabledMods(Path path){
 		Set<Mod> toExport = new HashSet<>();
 		for (Mod mod : modCache){
@@ -105,7 +100,7 @@ public class ModLoader extends Listenable<SelectorInterface<Mod>>
 		}
 		saveMods(toExport, path);
 	}
-	
+
 	public synchronized void importMods(Path path, ModManager mm){
 		for (Mod mod : loadMods(path, mm)){
 			for (SelectorInterface<Mod> l : getListeners()){
@@ -127,12 +122,12 @@ public class ModLoader extends Listenable<SelectorInterface<Mod>>
 			}
 		}
 	}
-	
+
 	// -- Private Methods ----------------------------------------
-	
+
 	private Set<Mod> loadMods(Path path, ModManager mm){
 		Set<Mod> mods = new HashSet<>();
-		
+
 		try(FileReader reader = new FileReader(path.toFile())){
 			// Try to load mods from file
 			Set<Mod> newMods = gson.fromJson(reader, modsType);
@@ -147,11 +142,11 @@ public class ModLoader extends Listenable<SelectorInterface<Mod>>
 		} catch (IOException e1) {
 			e1.printStackTrace();
 		}
-		
+
 		mods.addAll(DefaultMods.getDefaults());
 		return mods;
 	}
-	
+
 	private boolean trySatisfyLocalFiles(Mod mod, ModManager mm){
 		if (JOptionPane.showConfirmDialog(
 			null,
@@ -168,7 +163,7 @@ public class ModLoader extends Listenable<SelectorInterface<Mod>>
 		}
 		return false;
 	}
-	
+
 	private void saveMods(Set<Mod> mods, Path path){
 		try(FileWriter writer = new FileWriter(path.toFile())){
 			gson.toJson(mods, modsType, writer);

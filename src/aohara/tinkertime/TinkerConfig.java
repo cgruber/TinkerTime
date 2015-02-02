@@ -1,40 +1,47 @@
 package aohara.tinkertime;
 
+import aohara.common.config.ConfigBuilder;
+import aohara.common.config.Constraint.InvalidInputException;
+import aohara.common.config.GuiConfig;
+import aohara.tinkertime.controllers.OS;
+import dagger.Provides;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-
+import javax.inject.Singleton;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 
-import aohara.common.config.ConfigBuilder;
-import aohara.common.config.Constraint.InvalidInputException;
-import aohara.common.config.GuiConfig;
-import aohara.tinkertime.controllers.OS;
-
 /**
  * Stores and Retrieves User Configuration Data.
- * 
+ *
  * @author Andrew O'Hara
  */
+@Singleton
 public class TinkerConfig {
-	 
+
 	private static final String
 		GAMEDATA_PATH = "GameData Path",
 		AUTO_CHECK_FOR_MOD_UPDATES = "Check for Mod Updates on Startup",
 		NUM_CONCURRENT_DOWNLOADS = "Number of Concurrent Downloads",
 		USE_BORDERLESS_WINDOW = "Borderless KSP",
 		WIN_64 = "win64";
-		
+
 	private final GuiConfig config;
-	
+
 	protected TinkerConfig(GuiConfig config){
 		this.config = config;
 	}
-	
-	public static TinkerConfig create(){
+
+	@dagger.Module static class Module {
+	  @Provides TinkerConfig config() {
+	    return TinkerConfig.create();
+	  }
+	}
+
+	private static TinkerConfig create(){
 		ConfigBuilder builder = new ConfigBuilder();
 		builder.addTrueFalseProperty(AUTO_CHECK_FOR_MOD_UPDATES, true, false, false);
 		builder.addPathProperty(GAMEDATA_PATH, JFileChooser.DIRECTORIES_ONLY, null, false, false);
@@ -43,50 +50,50 @@ public class TinkerConfig {
 			USE_BORDERLESS_WINDOW, false, false, !OS.getOs().equals(OS.OsType.Windows)
 		).setDisplayName("Launch KSP in borderless window<br/>(Only relavent if KSP is set to windowed)");
 		builder.addTextProperty(WIN_64, null, true, true);
-		
+
 		GuiConfig config = builder.createGuiConfigInDocuments("TinkerTime Config", TinkerTime.NAME, "TinkerTime.json");
 		if (!config.isValid()){
 			config.openOptionsWindow(false, true);
 		}
-		
+
 		return new TinkerConfig(config);
 	}
-	
+
 	// -- Getters -------------------------------------------------------
-	
+
 	public Path getGameDataPath(){
-		return Paths.get(config.getProperty(GAMEDATA_PATH));	
+		return Paths.get(config.getProperty(GAMEDATA_PATH));
 	}
-	
+
 	public Path getModsZipPath(){
 		Path path = config.getFolder().resolve("mods");
 		path.toFile().mkdirs();
 		return path;
 	}
-	
+
 	public Path getImageCachePath(){
 		Path path = config.getFolder().resolve("imageCache");
 		path.toFile().mkdirs();
 		return path;
 	}
-	
+
 	public Path getModsListPath(){
 		return getGameDataPath().resolve("TinkerTime.json");
 	}
-	
+
 	public boolean autoCheckForModUpdates(){
-		return Boolean.parseBoolean(config.getProperty(AUTO_CHECK_FOR_MOD_UPDATES)); 
+		return Boolean.parseBoolean(config.getProperty(AUTO_CHECK_FOR_MOD_UPDATES));
 	}
-	
+
 	public int numConcurrentDownloads(){
 		return Integer.parseInt(config.getProperty(NUM_CONCURRENT_DOWNLOADS));
 	}
-	
+
 	public boolean use64BitGame(){
 		switch(OS.getOs()){
 		case Windows:
 			// If Windows, only run 64-bit if user chooses to.  Cache user's choice.
-			boolean is64Bit = System.getenv("ProgramFiles(x86)") != null; 
+			boolean is64Bit = System.getenv("ProgramFiles(x86)") != null;
 			if (is64Bit){
 				if (config.getProperty(WIN_64) == null){
 					boolean use64 = JOptionPane.showConfirmDialog(
@@ -128,13 +135,13 @@ public class TinkerConfig {
 			throw new IllegalStateException();
 		}
 	}
-	
+
 	public boolean useBorderlessWindow() {
 		return Boolean.parseBoolean(config.getProperty(USE_BORDERLESS_WINDOW));
 	}
-	
+
 	// -- Verification ----------------------------------------------------
-	
+
 	public void updateConfig(boolean restartOnSuccess, boolean exitOnCancel){
 		config.openOptionsWindow(restartOnSuccess, exitOnCancel);
 	}

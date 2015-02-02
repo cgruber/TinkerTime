@@ -1,16 +1,15 @@
 package aohara.tinkertime.views;
 
-import java.awt.Dimension;
-import java.awt.image.BufferedImage;
-import java.io.IOException;
-
-import javax.swing.ImageIcon;
-import javax.swing.JLabel;
-
 import aohara.common.content.ImageManager;
 import aohara.common.selectorPanel.ControlPanel;
 import aohara.tinkertime.TinkerConfig;
 import aohara.tinkertime.models.Mod;
+import java.awt.Dimension;
+import java.awt.image.BufferedImage;
+import java.io.IOException;
+import javax.inject.Inject;
+import javax.swing.ImageIcon;
+import javax.swing.JLabel;
 
 /**
  * Component which displays the Mod's image from a given URL.
@@ -18,18 +17,19 @@ import aohara.tinkertime.models.Mod;
  * @author Andrew O'Hara
  */
 public class ModImageView extends ControlPanel<Mod> {
-	
+
 	private static final Dimension MAX_IMAGE_SIZE = new Dimension(250, 250);
 	private final ImageManager imageManager = new ImageManager();
 	private final JLabel label = new JLabel();
 	private final TinkerConfig config;
-	
+
+	@Inject
 	public ModImageView(TinkerConfig config){
 		this.config = config;
 		panel.add(label);
 		panel.setMaximumSize(MAX_IMAGE_SIZE);
 	}
-	
+
 	@Override
 	public void display(Mod element){
 		BufferedImage image = null;
@@ -45,7 +45,7 @@ public class ModImageView extends ControlPanel<Mod> {
 				try{
 					image = imageManager.resizeImage(image, size);
 				} catch (IllegalArgumentException e){
-					
+
 				}
 			}
 		}

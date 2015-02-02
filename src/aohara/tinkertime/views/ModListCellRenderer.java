@@ -1,36 +1,36 @@
 package aohara.tinkertime.views;
 
+import aohara.common.content.ImageManager;
+import aohara.tinkertime.TinkerConfig;
+import aohara.tinkertime.models.Mod;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.image.BufferedImage;
 import java.util.LinkedList;
-
+import javax.inject.Inject;
 import javax.swing.DefaultListCellRenderer;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.ListCellRenderer;
-
 import thirdParty.CompoundIcon;
-import aohara.common.content.ImageManager;
-import aohara.tinkertime.TinkerConfig;
-import aohara.tinkertime.models.Mod;
 
 /**
  * Custom ListCellRenderer for a Mod to be displayed on a JList.
- * 
+ *
  * Displays the Mod name as well as all status icons to the left of it.
- *  
+ *
  * @author Andrew O'Hara
  */
 public class ModListCellRenderer implements ListCellRenderer<Mod> {
-	
+
 	private final ImageIcon checkIcon, xIcon, errorIcon, updateIcon, localIcon;
 	private final DefaultListCellRenderer def = new DefaultListCellRenderer();
 	private final ImageManager imageManager = new ImageManager("icon/");
 	private final TinkerConfig config;
-	
+
+	@Inject
 	public ModListCellRenderer(TinkerConfig config){
 		this.config = config;
 		checkIcon = loadIcon("glyphicons_152_check.png", new Color(70, 210, 70));
@@ -39,7 +39,7 @@ public class ModListCellRenderer implements ListCellRenderer<Mod> {
 		updateIcon = loadIcon("glyphicons_213_up_arrow.png", new Color(255, 200, 0));
 		localIcon = loadIcon("glyphicons_410_compressed.png", new Color(0, 0, 0));
 	}
-	
+
 	private ImageIcon loadIcon(String name, Color colour){
 		BufferedImage image = imageManager.getImage(name);
 		image = colour != null ? imageManager.colorize(image, colour) : image;
@@ -57,15 +57,15 @@ public class ModListCellRenderer implements ListCellRenderer<Mod> {
 		} else {
 			icons.add(errorIcon);
 		}
-		
+
 		if (mod.isUpdateAvailable()){
 			icons.add(updateIcon);
 		}
-		
+
 		if (mod.getPageUrl() == null){
 			icons.add(localIcon);
 		}
-		
+
 		// Create cell label
 		String text = mod.getName();
 		if (mod.getSupportedVersion() != null){

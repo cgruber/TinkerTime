@@ -10,10 +10,10 @@ public class DefaultMods {
 	public static Collection<Mod> getDefaults() {
 		Collection<Mod> defaults = new LinkedList<>();
 		
-		// Add Module Manager to Defaults
+		// Add TinkerTimeModule Manager to Defaults
 		 try {
 			 defaults.add(new Mod(
-				"ksp.sarbian.com", "Module Manager", null, null, null,
+				"ksp.sarbian.com", "TinkerTimeModule Manager", null, null, null,
 				new URL("https://ksp.sarbian.com/jenkins/job/ModuleManager/lastSuccessfulBuild/api/json"),
 				null, null
 			));

@@ -19,7 +19,7 @@ import aohara.tinkertime.TinkerConfig;
 /**
  * Model for discovering and reporting the structure of a Mod Zip File.
  * 
- * Mods can contain a Readme, and contain at least one Module.  Modules can contain
+ * Mods can contain a Readme, and contain at least one TinkerTimeModule.  Modules can contain
  * the main mod data, or its bundled dependency data.
  * 
  * @author Andrew O'Hara
